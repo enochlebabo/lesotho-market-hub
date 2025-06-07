@@ -11,21 +11,22 @@ const HeroSection = () => {
           <div className="space-y-8">
             <div className="space-y-4">
               <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">
-                Buy & Sell in
+                Where Goods Meet
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-600">
-                  {" "}Lesotho
+                  {" "}Good People
                 </span>
               </h1>
               <p className="text-xl text-gray-600 leading-relaxed">
-                Your trusted marketplace for second-hand goods, vehicles, electronics, and more. 
-                Connect with buyers and sellers across the beautiful Kingdom in the Sky.
+                MoCha Market - Lesotho's trusted digital marketplace for second-hand goods, 
+                vehicles, electronics, and more. Connecting Basotho buyers and sellers across 
+                all 10 districts of the Mountain Kingdom.
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
                 <Search className="w-5 h-5 mr-2" />
-                Start Shopping
+                Browse Marketplace
               </Button>
               <Button size="lg" variant="outline">
                 Sell Your Items
@@ -36,12 +37,12 @@ const HeroSection = () => {
             <div className="flex items-center space-x-6 text-sm text-gray-600">
               <div className="flex items-center">
                 <Star className="w-5 h-5 text-yellow-400 mr-1" />
-                <span className="font-medium">4.8/5</span>
-                <span className="ml-1">rating</span>
+                <span className="font-medium">Trusted</span>
+                <span className="ml-1">platform</span>
               </div>
               <div className="border-l border-gray-300 pl-6">
-                <span className="font-medium">10,000+</span>
-                <span className="ml-1">happy customers</span>
+                <span className="font-medium">Supporting</span>
+                <span className="ml-1">Lesotho's digital economy</span>
               </div>
             </div>
           </div>
