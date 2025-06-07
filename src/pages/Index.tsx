@@ -10,6 +10,7 @@ import CategoryGrid from '@/components/CategoryGrid';
 import FeaturedListings from '@/components/FeaturedListings';
 import AdBanner from '@/components/AdBanner';
 import Footer from '@/components/Footer';
+import AuthButton from '@/components/auth/AuthButton';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,10 +43,7 @@ const Index = () => {
             </div>
 
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm">
-                <Users className="w-4 h-4 mr-2" />
-                Sign In
-              </Button>
+              <AuthButton />
               <Button size="sm">
                 <Tag className="w-4 h-4 mr-2" />
                 List Item
