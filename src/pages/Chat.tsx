@@ -1,370 +1,346 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Send, ArrowLeft, MapPin, Share, Phone, Video } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ArrowLeft, Send, MapPin, Phone, Star, Image, Camera } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/components/auth/AuthContext';
-import { toast } from 'sonner';
 
 interface Message {
   id: string;
-  chat_id: string;
-  sender_id: string;
   content: string;
-  message_type: 'text' | 'location' | 'image';
-  created_at: string;
-  is_read: boolean;
+  senderId: string;
+  timestamp: Date;
+  type: 'text' | 'location' | 'image';
 }
 
-interface Chat {
+interface Product {
   id: string;
-  product_id: string;
-  buyer_id: string;
-  seller_id: string;
-  created_at: string;
-  updated_at: string;
-  product: {
-    title: string;
-    price: number;
-    currency: string;
-    images: string[];
-  };
+  title: string;
+  price: number;
+  currency: string;
+  images: string[];
+  location: string;
+}
+
+interface Seller {
+  id: string;
+  name: string;
+  phone: string;
+  location: string;
+  rating: number;
+  avatar?: string;
 }
 
 const Chat = () => {
-  const { sellerId } = useParams<{ sellerId: string }>();
-  const [searchParams] = useSearchParams();
-  const productId = searchParams.get('product');
-  const { user } = useAuth();
+  const { sellerId } = useParams();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [messageText, setMessageText] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
 
-  // Get or create chat
-  const { data: chat, isLoading: chatLoading } = useQuery({
-    queryKey: ['chat', sellerId, productId],
-    queryFn: async () => {
-      if (!user || !sellerId || !productId) return null;
-
-      // First try to find existing chat
-      let { data: existingChat } = await supabase
-        .from('chats')
-        .select(`
-          *,
-          products:product_id(title, price, currency, images)
-        `)
-        .eq('product_id', productId)
-        .eq('buyer_id', user.id)
-        .eq('seller_id', sellerId)
-        .single();
-
-      if (existingChat) {
-        return {
-          ...existingChat,
-          product: existingChat.products
-        };
-      }
-
-      // Create new chat if none exists
-      const { data: newChat, error } = await supabase
-        .from('chats')
-        .insert({
-          product_id: productId,
-          buyer_id: user.id,
-          seller_id: sellerId
-        })
-        .select(`
-          *,
-          products:product_id(title, price, currency, images)
-        `)
-        .single();
-
-      if (error) throw error;
-
-      return {
-        ...newChat,
-        product: newChat.products
-      };
-    },
-    enabled: !!user && !!sellerId && !!productId,
-  });
-
-  // Get chat messages
-  const { data: messages } = useQuery({
-    queryKey: ['messages', chat?.id],
-    queryFn: async () => {
-      if (!chat?.id) return [];
-
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('chat_id', chat.id)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!chat?.id,
-  });
-
-  // Get other user's profile
-  const { data: otherUser } = useQuery({
-    queryKey: ['user-profile', sellerId],
-    queryFn: async () => {
-      if (!sellerId) return null;
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', sellerId)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!sellerId,
-  });
-
-  // Send message mutation
-  const sendMessageMutation = useMutation({
-    mutationFn: async ({ content, messageType = 'text' }: { content: string; messageType?: string }) => {
-      if (!chat?.id || !user) throw new Error('Chat not ready');
-
-      const { data, error } = await supabase
-        .from('messages')
-        .insert({
-          chat_id: chat.id,
-          sender_id: user.id,
-          content,
-          message_type: messageType
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['messages', chat?.id] });
-      setMessageText('');
-    },
-  });
-
-  // Real-time message subscription
-  useEffect(() => {
-    if (!chat?.id) return;
-
-    const channel = supabase
-      .channel('chat-messages')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `chat_id=eq.${chat.id}`
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['messages', chat.id] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [chat?.id, queryClient]);
-
-  // Auto-scroll to bottom
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!messageText.trim()) return;
-
-    sendMessageMutation.mutate({ content: messageText.trim() });
+  // Mock data for demonstration
+  const mockProduct: Product = {
+    id: '1',
+    title: 'Toyota Camry 2018',
+    price: 250000,
+    currency: 'LSL',
+    images: ['/placeholder.svg'],
+    location: 'Maseru, Lesotho'
   };
 
-  const shareLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          const locationUrl = `https://maps.google.com/?q=${latitude},${longitude}`;
-          sendMessageMutation.mutate({ 
-            content: locationUrl, 
-            messageType: 'location' 
-          });
-          toast.success('Location shared');
-        },
-        () => {
-          toast.error('Failed to get location');
-        }
-      );
-    } else {
-      toast.error('Geolocation not supported');
+  const mockSeller: Seller = {
+    id: sellerId || '1',
+    name: 'John Doe',
+    phone: '+266 5555 1234',
+    location: 'Maseru, Lesotho',
+    rating: 4.5,
+    avatar: '/placeholder.svg'
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
+    // Mock initial messages
+    setMessages([
+      {
+        id: '1',
+        content: 'Hi! I\'m interested in your Toyota Camry. Is it still available?',
+        senderId: user?.id || 'buyer',
+        timestamp: new Date(Date.now() - 60000),
+        type: 'text'
+      },
+      {
+        id: '2',
+        content: 'Yes, it\'s still available! Would you like to schedule a viewing?',
+        senderId: sellerId || 'seller',
+        timestamp: new Date(Date.now() - 30000),
+        type: 'text'
+      }
+    ]);
+  }, [sellerId, user?.id]);
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !user) return;
+
+    const message: Message = {
+      id: Date.now().toString(),
+      content: newMessage,
+      senderId: user.id,
+      timestamp: new Date(),
+      type: 'text'
+    };
+
+    setMessages(prev => [...prev, message]);
+    setNewMessage('');
+
+    // Mock response from seller
+    setTimeout(() => {
+      const response: Message = {
+        id: (Date.now() + 1).toString(),
+        content: 'Thank you for your message! I\'ll get back to you soon.',
+        senderId: sellerId || 'seller',
+        timestamp: new Date(),
+        type: 'text'
+      };
+      setMessages(prev => [...prev, response]);
+    }, 1000);
+  };
+
+  const handleShareLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Location not supported",
+        description: "Your browser doesn't support location sharing.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const locationMessage: Message = {
+          id: Date.now().toString(),
+          content: `Location: ${latitude}, ${longitude}`,
+          senderId: user?.id || 'user',
+          timestamp: new Date(),
+          type: 'location'
+        };
+        setMessages(prev => [...prev, locationMessage]);
+        setIsLoading(false);
+        toast({
+          title: "Location shared",
+          description: "Your location has been shared with the seller."
+        });
+      },
+      (error) => {
+        setIsLoading(false);
+        toast({
+          title: "Location error",
+          description: "Unable to get your location. Please try again.",
+          variant: "destructive"
+        });
+      }
+    );
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
     }
   };
 
-  if (chatLoading) {
+  if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading chat...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!chat) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Chat not found</h2>
-          <Button onClick={() => navigate('/products')}>
-            Back to Products
-          </Button>
-        </div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6 text-center">
+            <p className="mb-4">Please log in to start chatting.</p>
+            <Button onClick={() => navigate('/auth')}>Log In</Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Chat Header */}
-      <div className="bg-white shadow-sm border-b px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-            <Avatar>
-              <AvatarImage src={otherUser?.avatar_url} />
-              <AvatarFallback>
-                {otherUser?.first_name?.[0]}{otherUser?.last_name?.[0]}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <h3 className="font-semibold">
-                {otherUser?.first_name} {otherUser?.last_name}
-              </h3>
-              <p className="text-sm text-gray-500">
-                {otherUser?.location && (
-                  <>
-                    <MapPin className="w-3 h-3 inline mr-1" />
-                    {otherUser.location}
-                  </>
-                )}
-              </p>
-            </div>
-          </div>
-          <div className="flex space-x-2">
-            <Button variant="outline" size="sm">
-              <Phone className="w-4 h-4" />
-            </Button>
-            <Button variant="outline" size="sm">
-              <Video className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Product Info */}
-      {chat.product && (
-        <div className="bg-blue-50 border-b px-4 py-3">
-          <div className="flex items-center space-x-3">
-            <img
-              src={chat.product.images?.[0] || 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=100'}
-              alt={chat.product.title}
-              className="w-12 h-12 object-cover rounded"
-            />
-            <div className="flex-1">
-              <h4 className="font-medium text-sm">{chat.product.title}</h4>
-              <p className="text-sm font-semibold text-primary">
-                {chat.product.currency} {chat.product.price.toLocaleString()}
-              </p>
-            </div>
-            <Button size="sm" variant="outline" onClick={() => navigate(`/product/${productId}`)}>
-              View Item
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages?.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                message.sender_id === user?.id
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-white shadow-sm'
-              }`}
-            >
-              {message.message_type === 'location' ? (
-                <div className="space-y-2">
-                  <p className="text-sm">📍 Location shared</p>
-                  <Button
-                    size="sm"
-                    variant={message.sender_id === user?.id ? "secondary" : "default"}
-                    onClick={() => window.open(message.content, '_blank')}
-                  >
-                    View on Map
-                  </Button>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/products')}
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+              <div className="flex items-center space-x-3">
+                <Avatar>
+                  <AvatarImage src={mockSeller.avatar} />
+                  <AvatarFallback>{mockSeller.name.substring(0, 2)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <h2 className="font-semibold">{mockSeller.name}</h2>
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Star className="w-3 h-3 mr-1 fill-yellow-400 text-yellow-400" />
+                    {mockSeller.rating}
+                  </div>
                 </div>
-              ) : (
-                <p className="text-sm">{message.content}</p>
-              )}
-              <p className={`text-xs mt-1 ${
-                message.sender_id === user?.id ? 'text-primary-foreground/70' : 'text-gray-500'
-              }`}>
-                {new Date(message.created_at).toLocaleTimeString([], { 
-                  hour: '2-digit', 
-                  minute: '2-digit' 
-                })}
-              </p>
+              </div>
             </div>
           </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
+        </div>
+      </header>
 
-      {/* Message Input */}
-      <div className="bg-white border-t p-4">
-        <form onSubmit={handleSendMessage} className="flex space-x-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={shareLocation}
-          >
-            <MapPin className="w-4 h-4" />
-          </Button>
-          <Input
-            value={messageText}
-            onChange={(e) => setMessageText(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1"
-          />
-          <Button type="submit" disabled={!messageText.trim() || sendMessageMutation.isPending}>
-            <Send className="w-4 h-4" />
-          </Button>
-        </form>
+      <div className="max-w-4xl mx-auto p-4">
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Product Info */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Product Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <img
+                  src={mockProduct.images[0]}
+                  alt={mockProduct.title}
+                  className="w-full h-48 object-cover rounded-lg"
+                />
+                <div>
+                  <h3 className="font-semibold">{mockProduct.title}</h3>
+                  <p className="text-2xl font-bold text-primary">
+                    {mockProduct.currency} {mockProduct.price.toLocaleString()}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <MapPin className="w-4 h-4 mr-2" />
+                    {mockProduct.location}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Seller Info */}
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle className="text-lg">Seller Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <Avatar>
+                    <AvatarImage src={mockSeller.avatar} />
+                    <AvatarFallback>{mockSeller.name.substring(0, 2)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-semibold">{mockSeller.name}</p>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Star className="w-3 h-3 mr-1 fill-yellow-400 text-yellow-400" />
+                      {mockSeller.rating} rating
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center text-sm">
+                    <Phone className="w-4 h-4 mr-2" />
+                    {mockSeller.phone}
+                  </div>
+                  <div className="flex items-center text-sm">
+                    <MapPin className="w-4 h-4 mr-2" />
+                    {mockSeller.location}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Chat */}
+          <div className="lg:col-span-2">
+            <Card className="h-[600px] flex flex-col">
+              <CardHeader>
+                <CardTitle className="text-lg">Chat with Seller</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col p-0">
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${
+                        message.senderId === user.id ? 'justify-end' : 'justify-start'
+                      }`}
+                    >
+                      <div
+                        className={`max-w-[70%] p-3 rounded-lg ${
+                          message.senderId === user.id
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted'
+                        }`}
+                      >
+                        {message.type === 'location' ? (
+                          <div className="flex items-center space-x-2">
+                            <MapPin className="w-4 h-4" />
+                            <span className="text-sm">Location shared</span>
+                          </div>
+                        ) : (
+                          <p className="text-sm">{message.content}</p>
+                        )}
+                        <p className="text-xs opacity-70 mt-1">
+                          {message.timestamp.toLocaleTimeString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* Message Input */}
+                <div className="border-t p-4">
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleShareLocation}
+                      disabled={isLoading}
+                    >
+                      <MapPin className="w-4 h-4" />
+                    </Button>
+                    <Input
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Type your message..."
+                      className="flex-1"
+                    />
+                    <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
