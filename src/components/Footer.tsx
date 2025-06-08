@@ -1,10 +1,13 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MapPin, Users, Star, ArrowRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const Footer = () => {
+  const navigate = useNavigate();
+
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -50,33 +53,33 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Categories</h4>
             <ul className="space-y-2 text-sm text-gray-300">
-              <li><a href="#" className="hover:text-white transition-colors">Vehicles</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Electronics</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Furniture</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Fashion</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Services</a></li>
+              <li><button onClick={() => navigate('/products?category=vehicles')} className="hover:text-white transition-colors">Vehicles</button></li>
+              <li><button onClick={() => navigate('/products?category=electronics')} className="hover:text-white transition-colors">Electronics</button></li>
+              <li><button onClick={() => navigate('/products?category=furniture')} className="hover:text-white transition-colors">Furniture</button></li>
+              <li><button onClick={() => navigate('/products?category=fashion')} className="hover:text-white transition-colors">Fashion</button></li>
+              <li><button onClick={() => navigate('/products?category=services')} className="hover:text-white transition-colors">Services</button></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4">For Businesses</h4>
             <ul className="space-y-2 text-sm text-gray-300">
-              <li><a href="#" className="hover:text-white transition-colors">Advertise with Us</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Business Listings</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Seller Dashboard</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Success Stories</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Support</a></li>
+              <li><button onClick={() => navigate('/contact-us')} className="hover:text-white transition-colors">Advertise with Us</button></li>
+              <li><button onClick={() => navigate('/list-product')} className="hover:text-white transition-colors">Business Listings</button></li>
+              <li><button onClick={() => navigate('/auth')} className="hover:text-white transition-colors">Seller Dashboard</button></li>
+              <li><button onClick={() => navigate('/help-center')} className="hover:text-white transition-colors">Success Stories</button></li>
+              <li><button onClick={() => navigate('/help-center')} className="hover:text-white transition-colors">Support</button></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-sm text-gray-300">
-              <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Safety Tips</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
+              <li><button onClick={() => navigate('/help-center')} className="hover:text-white transition-colors">Help Center</button></li>
+              <li><button onClick={() => navigate('/safety-tips')} className="hover:text-white transition-colors">Safety Tips</button></li>
+              <li><button onClick={() => navigate('/terms-of-service')} className="hover:text-white transition-colors">Terms of Service</button></li>
+              <li><button onClick={() => navigate('/privacy-policy')} className="hover:text-white transition-colors">Privacy Policy</button></li>
+              <li><button onClick={() => navigate('/contact-us')} className="hover:text-white transition-colors">Contact Us</button></li>
             </ul>
           </div>
         </div>

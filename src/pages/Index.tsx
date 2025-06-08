@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Star, Clock, Tag, Users, Briefcase } from 'lucide-react';
@@ -22,7 +21,7 @@ const Index = () => {
   };
 
   const handleSellItems = () => {
-    navigate('/auth');
+    navigate('/list-product');
   };
 
   const handleSearch = (e: React.FormEvent) => {
