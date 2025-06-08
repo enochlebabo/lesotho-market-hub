@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Clock, Star, Heart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const featuredItems = [
   {
@@ -75,6 +75,17 @@ const featuredItems = [
 ];
 
 const FeaturedListings = () => {
+  const navigate = useNavigate();
+
+  const handleProductClick = (productId: number) => {
+    // For demo purposes, navigate to a sample product
+    navigate('/products');
+  };
+
+  const handleViewAllItems = () => {
+    navigate('/products');
+  };
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -87,7 +98,7 @@ const FeaturedListings = () => {
               Handpicked items from trusted sellers across Lesotho
             </p>
           </div>
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleViewAllItems}>
             View All Items
           </Button>
         </div>
@@ -103,6 +114,7 @@ const FeaturedListings = () => {
                   src={item.image}
                   alt={item.title}
                   className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                  onClick={() => handleProductClick(item.id)}
                 />
                 {item.featured && (
                   <Badge className="absolute top-3 left-3 bg-orange-500 hover:bg-orange-600">
@@ -131,7 +143,10 @@ const FeaturedListings = () => {
                     </div>
                   </div>
 
-                  <h3 className="font-semibold text-lg text-gray-900 line-clamp-2">
+                  <h3 
+                    className="font-semibold text-lg text-gray-900 line-clamp-2 cursor-pointer hover:text-blue-600"
+                    onClick={() => handleProductClick(item.id)}
+                  >
                     {item.title}
                   </h3>
 
@@ -152,7 +167,10 @@ const FeaturedListings = () => {
                     </div>
                   </div>
 
-                  <Button className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                  <Button 
+                    className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300"
+                    onClick={() => handleProductClick(item.id)}
+                  >
                     View Details
                   </Button>
                 </div>

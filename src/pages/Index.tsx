@@ -14,6 +14,24 @@ import AuthButton from '@/components/auth/AuthButton';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleBrowseMarketplace = () => {
+    navigate('/products');
+  };
+
+  const handleSellItems = () => {
+    navigate('/auth');
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
+    } else {
+      navigate('/products');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -22,7 +40,9 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-primary">MoCha Market</h1>
+              <h1 className="text-2xl font-bold text-primary cursor-pointer" onClick={() => navigate('/')}>
+                MoCha Market
+              </h1>
               <Badge variant="secondary" className="hidden sm:inline-flex">
                 <MapPin className="w-3 h-3 mr-1" />
                 Kingdom of Lesotho
@@ -30,7 +50,7 @@ const Index = () => {
             </div>
             
             <div className="flex-1 max-w-md mx-8 hidden md:block">
-              <div className="relative">
+              <form onSubmit={handleSearch} className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
                   type="text"
@@ -39,12 +59,12 @@ const Index = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
-              </div>
+              </form>
             </div>
 
             <div className="flex items-center space-x-3">
               <AuthButton />
-              <Button size="sm">
+              <Button size="sm" onClick={handleSellItems}>
                 <Tag className="w-4 h-4 mr-2" />
                 List Item
               </Button>
@@ -53,7 +73,7 @@ const Index = () => {
 
           {/* Mobile Search */}
           <div className="md:hidden pb-4">
-            <div className="relative">
+            <form onSubmit={handleSearch} className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
                 type="text"
@@ -62,7 +82,7 @@ const Index = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
-            </div>
+            </form>
           </div>
         </div>
       </header>
@@ -122,7 +142,7 @@ const Index = () => {
               From Maseru to the highlands, MoCha Market connects buyers and sellers nationwide.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary">
+              <Button size="lg" variant="secondary" onClick={handleSellItems}>
                 List Your Business
               </Button>
               <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-blue-600">

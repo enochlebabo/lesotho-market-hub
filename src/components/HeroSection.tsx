@@ -2,8 +2,19 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Search, Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+
+  const handleBrowseMarketplace = () => {
+    navigate('/products');
+  };
+
+  const handleSellItems = () => {
+    navigate('/auth');
+  };
+
   return (
     <section className="relative bg-gradient-to-br from-blue-50 via-white to-green-50 py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -23,11 +34,11 @@ const HeroSection = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700" onClick={handleBrowseMarketplace}>
                 <Search className="w-5 h-5 mr-2" />
                 Browse Marketplace
               </Button>
-              <Button size="lg" variant="outline">
+              <Button size="lg" variant="outline" onClick={handleSellItems}>
                 Sell Your Items
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
