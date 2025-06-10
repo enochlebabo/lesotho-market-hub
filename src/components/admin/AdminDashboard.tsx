@@ -17,10 +17,7 @@ const AdminDashboard = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('seller_verification')
-        .select(`
-          *,
-          profiles!inner(first_name, last_name)
-        `)
+        .select('*')
         .eq('verification_status', 'pending');
 
       if (error) throw error;
@@ -33,10 +30,7 @@ const AdminDashboard = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('business_accounts')
-        .select(`
-          *,
-          profiles!inner(first_name, last_name)
-        `);
+        .select('*');
 
       if (error) throw error;
       return data;
@@ -48,10 +42,21 @@ const AdminDashboard = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('advertisements')
-        .select(`
-          *,
-          profiles!inner(first_name, last_name)
-        `);
+        .select('*');
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: transactions } = useQuery({
+    queryKey: ['admin-transactions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
 
       if (error) throw error;
       return data;
@@ -81,6 +86,7 @@ const AdminDashboard = () => {
     pendingVerifications: verificationRequests?.length || 0,
     activeAds: advertisements?.filter(ad => ad.is_active).length || 0,
     monthlyRevenue: advertisements?.reduce((sum, ad) => sum + (ad.monthly_fee || 0), 0) || 0,
+    totalTransactions: transactions?.length || 0,
   };
 
   return (
@@ -91,7 +97,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -131,6 +137,16 @@ const AdminDashboard = () => {
             <div className="text-2xl font-bold">M {stats.monthlyRevenue}</div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Transactions</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalTransactions}</div>
+          </CardContent>
+        </Card>
       </div>
 
       <Tabs defaultValue="verifications" className="space-y-4">
@@ -138,6 +154,7 @@ const AdminDashboard = () => {
           <TabsTrigger value="verifications">Seller Verifications</TabsTrigger>
           <TabsTrigger value="business">Business Accounts</TabsTrigger>
           <TabsTrigger value="ads">Advertisements</TabsTrigger>
+          <TabsTrigger value="transactions">Transactions</TabsTrigger>
         </TabsList>
 
         <TabsContent value="verifications" className="space-y-4">
@@ -149,9 +166,7 @@ const AdminDashboard = () => {
               {verificationRequests?.map((request) => (
                 <div key={request.id} className="flex items-center justify-between p-4 border rounded-lg mb-4">
                   <div>
-                    <h3 className="font-semibold">
-                      {request.profiles?.first_name} {request.profiles?.last_name}
-                    </h3>
+                    <h3 className="font-semibold">User ID: {request.user_id}</h3>
                     <p className="text-sm text-muted-foreground">
                       Submitted: {new Date(request.created_at!).toLocaleDateString()}
                     </p>
@@ -160,6 +175,12 @@ const AdminDashboard = () => {
                         ? request.verification_documents.length 
                         : 0} files
                     </p>
+                    {request.government_id_url && (
+                      <p className="text-sm text-blue-600">Government ID uploaded</p>
+                    )}
+                    {request.social_media_link && (
+                      <p className="text-sm">Social Media: {request.social_media_link}</p>
+                    )}
                   </div>
                   <div className="flex space-x-2">
                     <Button
@@ -204,7 +225,7 @@ const AdminDashboard = () => {
                   <div>
                     <h3 className="font-semibold">{account.business_name}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {account.profiles?.first_name} {account.profiles?.last_name}
+                      User ID: {account.user_id}
                     </p>
                     <p className="text-sm">Type: {account.business_type}</p>
                   </div>
@@ -234,9 +255,12 @@ const AdminDashboard = () => {
                   <div>
                     <h3 className="font-semibold">{ad.ad_title}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {ad.profiles?.first_name} {ad.profiles?.last_name}
+                      User ID: {ad.user_id}
                     </p>
                     <p className="text-sm">Type: {ad.ad_type}</p>
+                    {ad.target_category && (
+                      <p className="text-sm">Category: {ad.target_category}</p>
+                    )}
                   </div>
                   <div className="text-right">
                     <Badge variant={ad.is_active ? "default" : "secondary"}>
@@ -251,6 +275,43 @@ const AdminDashboard = () => {
               ))}
               {!advertisements?.length && (
                 <p className="text-muted-foreground">No advertisements</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="transactions" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Transactions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {transactions?.map((transaction) => (
+                <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg mb-4">
+                  <div>
+                    <h3 className="font-semibold">{transaction.product_name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Transaction ID: {transaction.id}
+                    </p>
+                    <p className="text-sm">Price: M {transaction.agreed_price}</p>
+                    <p className="text-sm">Delivery: {transaction.delivery_option}</p>
+                  </div>
+                  <div className="text-right">
+                    <Badge variant={
+                      transaction.status === 'completed' ? 'default' :
+                      transaction.status === 'pending' ? 'secondary' :
+                      transaction.status === 'cancelled' ? 'destructive' : 'outline'
+                    }>
+                      {transaction.status?.toUpperCase()}
+                    </Badge>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(transaction.created_at!).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              {!transactions?.length && (
+                <p className="text-muted-foreground">No transactions</p>
               )}
             </CardContent>
           </Card>

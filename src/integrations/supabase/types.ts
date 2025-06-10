@@ -143,6 +143,45 @@ export type Database = {
           },
         ]
       }
+      delivery_options: {
+        Row: {
+          base_delivery_fee: number | null
+          created_at: string | null
+          delivery_radius_km: number | null
+          delivery_type: string
+          estimated_delivery_time: string | null
+          id: string
+          is_active: boolean | null
+          listing_id: string
+          per_km_rate: number | null
+          seller_id: string
+        }
+        Insert: {
+          base_delivery_fee?: number | null
+          created_at?: string | null
+          delivery_radius_km?: number | null
+          delivery_type: string
+          estimated_delivery_time?: string | null
+          id?: string
+          is_active?: boolean | null
+          listing_id: string
+          per_km_rate?: number | null
+          seller_id: string
+        }
+        Update: {
+          base_delivery_fee?: number | null
+          created_at?: string | null
+          delivery_radius_km?: number | null
+          delivery_type?: string
+          estimated_delivery_time?: string | null
+          id?: string
+          is_active?: boolean | null
+          listing_id?: string
+          per_km_rate?: number | null
+          seller_id?: string
+        }
+        Relationships: []
+      }
       premium_listings: {
         Row: {
           created_at: string | null
@@ -212,33 +251,191 @@ export type Database = {
         }
         Relationships: []
       }
+      reservations: {
+        Row: {
+          buyer_id: string
+          created_at: string | null
+          expires_at: string
+          id: string
+          payment_method: string
+          payment_reference: string | null
+          refunded_at: string | null
+          released_at: string | null
+          reservation_amount: number
+          seller_id: string
+          status: string | null
+          transaction_id: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          payment_method: string
+          payment_reference?: string | null
+          refunded_at?: string | null
+          released_at?: string | null
+          reservation_amount: number
+          seller_id: string
+          status?: string | null
+          transaction_id: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          payment_method?: string
+          payment_reference?: string | null
+          refunded_at?: string | null
+          released_at?: string | null
+          reservation_amount?: number
+          seller_id?: string
+          status?: string | null
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seller_reviews: {
+        Row: {
+          buyer_id: string
+          created_at: string | null
+          id: string
+          rating: number
+          response_time_rating: number | null
+          review_text: string | null
+          seller_id: string
+          transaction_id: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string | null
+          id?: string
+          rating: number
+          response_time_rating?: number | null
+          review_text?: string | null
+          seller_id: string
+          transaction_id: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string | null
+          id?: string
+          rating?: number
+          response_time_rating?: number | null
+          review_text?: string | null
+          seller_id?: string
+          transaction_id?: string
+        }
+        Relationships: []
+      }
       seller_verification: {
         Row: {
           created_at: string | null
+          government_id_url: string | null
           id: string
+          mobile_verified: boolean | null
+          social_media_link: string | null
           updated_at: string | null
           user_id: string
+          verification_badges: Json | null
           verification_documents: Json | null
           verification_status: string | null
           verified_at: string | null
         }
         Insert: {
           created_at?: string | null
+          government_id_url?: string | null
           id?: string
+          mobile_verified?: boolean | null
+          social_media_link?: string | null
           updated_at?: string | null
           user_id: string
+          verification_badges?: Json | null
           verification_documents?: Json | null
           verification_status?: string | null
           verified_at?: string | null
         }
         Update: {
           created_at?: string | null
+          government_id_url?: string | null
           id?: string
+          mobile_verified?: boolean | null
+          social_media_link?: string | null
           updated_at?: string | null
           user_id?: string
+          verification_badges?: Json | null
           verification_documents?: Json | null
           verification_status?: string | null
           verified_at?: string | null
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          agreed_price: number
+          buyer_id: string
+          cancelled_at: string | null
+          completed_at: string | null
+          created_at: string | null
+          delivery_address: string | null
+          delivery_distance_km: number | null
+          delivery_fee: number | null
+          delivery_option: string | null
+          id: string
+          listing_id: string
+          product_name: string
+          receipt_generated: boolean | null
+          receipt_url: string | null
+          reservation_fee: number | null
+          seller_id: string
+          status: string | null
+        }
+        Insert: {
+          agreed_price: number
+          buyer_id: string
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          delivery_address?: string | null
+          delivery_distance_km?: number | null
+          delivery_fee?: number | null
+          delivery_option?: string | null
+          id?: string
+          listing_id: string
+          product_name: string
+          receipt_generated?: boolean | null
+          receipt_url?: string | null
+          reservation_fee?: number | null
+          seller_id: string
+          status?: string | null
+        }
+        Update: {
+          agreed_price?: number
+          buyer_id?: string
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          delivery_address?: string | null
+          delivery_distance_km?: number | null
+          delivery_fee?: number | null
+          delivery_option?: string | null
+          id?: string
+          listing_id?: string
+          product_name?: string
+          receipt_generated?: boolean | null
+          receipt_url?: string | null
+          reservation_fee?: number | null
+          seller_id?: string
+          status?: string | null
         }
         Relationships: []
       }
@@ -247,9 +444,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_seller_rating: {
+        Args: { seller_user_id: string }
+        Returns: {
+          average_rating: number
+          total_reviews: number
+          response_time_rating: number
+        }[]
+      }
       is_admin: {
         Args: { user_id: string }
         Returns: boolean
+      }
+      update_seller_badges: {
+        Args: { seller_user_id: string }
+        Returns: Json
       }
     }
     Enums: {
