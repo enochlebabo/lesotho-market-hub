@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ const featuredItems = [
     timeAgo: '2 hours ago',
     rating: 4.8,
     featured: true,
+    isVerifiedSeller: true,
   },
   {
     id: 2,
@@ -27,6 +29,7 @@ const featuredItems = [
     timeAgo: '5 hours ago',
     rating: 4.9,
     featured: false,
+    isVerifiedSeller: true,
   },
   {
     id: 3,
@@ -38,6 +41,7 @@ const featuredItems = [
     timeAgo: '1 day ago',
     rating: 4.7,
     featured: true,
+    isVerifiedSeller: false,
   },
   {
     id: 4,
@@ -49,6 +53,7 @@ const featuredItems = [
     timeAgo: '3 hours ago',
     rating: 5.0,
     featured: false,
+    isVerifiedSeller: true,
   },
   {
     id: 5,
@@ -60,6 +65,7 @@ const featuredItems = [
     timeAgo: '6 hours ago',
     rating: 4.6,
     featured: true,
+    isVerifiedSeller: false,
   },
   {
     id: 6,
@@ -71,6 +77,7 @@ const featuredItems = [
     timeAgo: '1 day ago',
     rating: 4.9,
     featured: false,
+    isVerifiedSeller: true,
   },
 ];
 
@@ -78,7 +85,6 @@ const FeaturedListings = () => {
   const navigate = useNavigate();
 
   const handleProductClick = (productId: number) => {
-    // For demo purposes, navigate to a sample product
     navigate('/products');
   };
 
@@ -95,7 +101,7 @@ const FeaturedListings = () => {
               Featured Listings
             </h2>
             <p className="text-lg text-gray-600">
-              Handpicked items from trusted sellers across Lesotho
+              Handpicked goods from trusted sellers across Lesotho
             </p>
           </div>
           <Button variant="outline" onClick={handleViewAllItems}>
@@ -122,10 +128,15 @@ const FeaturedListings = () => {
                     Featured
                   </Badge>
                 )}
+                {item.isVerifiedSeller && (
+                  <Badge className="absolute top-3 right-3 bg-green-500 hover:bg-green-600">
+                    ✓ Verified
+                  </Badge>
+                )}
                 <Button
                   size="sm"
                   variant="secondary"
-                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 >
                   <Heart className="w-4 h-4" />
                 </Button>

@@ -9,6 +9,176 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      advertisements: {
+        Row: {
+          ad_description: string | null
+          ad_image_url: string | null
+          ad_title: string
+          ad_type: string
+          click_count: number | null
+          created_at: string | null
+          end_date: string
+          id: string
+          impression_count: number | null
+          is_active: boolean | null
+          monthly_fee: number
+          start_date: string | null
+          target_category: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          ad_description?: string | null
+          ad_image_url?: string | null
+          ad_title: string
+          ad_type: string
+          click_count?: number | null
+          created_at?: string | null
+          end_date: string
+          id?: string
+          impression_count?: number | null
+          is_active?: boolean | null
+          monthly_fee: number
+          start_date?: string | null
+          target_category?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          ad_description?: string | null
+          ad_image_url?: string | null
+          ad_title?: string
+          ad_type?: string
+          click_count?: number | null
+          created_at?: string | null
+          end_date?: string
+          id?: string
+          impression_count?: number | null
+          is_active?: boolean | null
+          monthly_fee?: number
+          start_date?: string | null
+          target_category?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      business_accounts: {
+        Row: {
+          business_name: string
+          business_type: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          monthly_fee: number | null
+          plan_end_date: string | null
+          plan_start_date: string | null
+          plan_type: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          business_name: string
+          business_type: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          monthly_fee?: number | null
+          plan_end_date?: string | null
+          plan_start_date?: string | null
+          plan_type?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          business_name?: string
+          business_type?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          monthly_fee?: number | null
+          plan_end_date?: string | null
+          plan_start_date?: string | null
+          plan_type?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          parent_category_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          parent_category_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          parent_category_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_category_id_fkey"
+            columns: ["parent_category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      premium_listings: {
+        Row: {
+          created_at: string | null
+          end_date: string
+          fee_amount: number
+          id: string
+          is_active: boolean | null
+          listing_id: string
+          premium_type: string
+          start_date: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          end_date: string
+          fee_amount: number
+          id?: string
+          is_active?: boolean | null
+          listing_id: string
+          premium_type: string
+          start_date?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          end_date?: string
+          fee_amount?: number
+          id?: string
+          is_active?: boolean | null
+          listing_id?: string
+          premium_type?: string
+          start_date?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -42,12 +212,45 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_verification: {
+        Row: {
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+          verification_documents: Json | null
+          verification_status: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+          verification_documents?: Json | null
+          verification_status?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+          verification_documents?: Json | null
+          verification_status?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
