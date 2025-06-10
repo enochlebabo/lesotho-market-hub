@@ -6,13 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Upload, X, Image } from 'lucide-react';
+import { ArrowLeft, Upload, X, Image, CheckCircle, AlertTriangle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import ImageQualityChecker from '@/components/upload/ImageQualityChecker';
 
 const ListProduct = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [photos, setPhotos] = useState<File[]>([]);
+  const [pendingPhotos, setPendingPhotos] = useState<File[]>([]);
+  const [rejectedPhotos, setRejectedPhotos] = useState<{ file: File; issues: string[] }[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -31,7 +34,7 @@ const ListProduct = () => {
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const totalPhotos = photos.length + files.length;
+    const totalPhotos = photos.length + pendingPhotos.length + files.length;
 
     if (totalPhotos > 30) {
       toast({
@@ -42,11 +45,36 @@ const ListProduct = () => {
       return;
     }
 
-    setPhotos(prev => [...prev, ...files]);
+    // Add files to pending for quality check
+    setPendingPhotos(prev => [...prev, ...files]);
+  };
+
+  const handlePhotoAccept = (file: File) => {
+    setPhotos(prev => [...prev, file]);
+    setPendingPhotos(prev => prev.filter(f => f !== file));
+    
+    toast({
+      title: "Photo approved!",
+      description: "Image quality check passed.",
+    });
+  };
+
+  const handlePhotoReject = (file: File, issues: string[]) => {
+    setRejectedPhotos(prev => [...prev, { file, issues }]);
+    setPendingPhotos(prev => prev.filter(f => f !== file));
   };
 
   const removePhoto = (index: number) => {
     setPhotos(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeRejectedPhoto = (index: number) => {
+    setRejectedPhotos(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const retryRejectedPhoto = (file: File) => {
+    setRejectedPhotos(prev => prev.filter(rejected => rejected.file !== file));
+    setPendingPhotos(prev => [...prev, file]);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -55,16 +83,16 @@ const ListProduct = () => {
     if (photos.length < 5) {
       toast({
         title: "Not enough photos",
-        description: "Please upload at least 5 photos of your product.",
+        description: "Please upload at least 5 high-quality photos of your product.",
         variant: "destructive"
       });
       return;
     }
 
-    if (photos.length > 30) {
+    if (pendingPhotos.length > 0) {
       toast({
-        title: "Too many photos",
-        description: "Maximum 30 photos allowed per listing.",
+        title: "Photos still processing",
+        description: "Please wait for all photos to complete quality checks.",
         variant: "destructive"
       });
       return;
@@ -115,7 +143,7 @@ const ListProduct = () => {
               {/* Photo Upload Section */}
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Product Photos (Required: 5-30 photos)
+                  Product Photos (Required: 5-30 high-quality photos)
                 </label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                   <input
@@ -133,35 +161,108 @@ const ListProduct = () => {
                     <Upload className="w-12 h-12 text-gray-400 mb-4" />
                     <p className="text-lg font-medium">Upload Photos</p>
                     <p className="text-sm text-muted-foreground">
-                      Choose 5-30 high-quality images of your product
+                      Choose high-quality images - we'll check them automatically
                     </p>
                   </label>
                 </div>
                 
-                <div className="mt-2 text-sm text-muted-foreground">
-                  Photos uploaded: {photos.length}/30 (Minimum 5 required)
+                <div className="mt-2 text-sm text-muted-foreground flex items-center justify-between">
+                  <span>Photos: {photos.length} approved, {pendingPhotos.length} processing, {rejectedPhotos.length} rejected</span>
+                  <span className="text-green-600 font-medium">Minimum 5 required</span>
                 </div>
 
-                {photos.length > 0 && (
-                  <div className="grid grid-cols-4 gap-4 mt-4">
-                    {photos.map((photo, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={URL.createObjectURL(photo)}
-                          alt={`Upload ${index + 1}`}
-                          className="w-full h-20 object-cover rounded"
-                        />
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="destructive"
-                          className="absolute -top-2 -right-2 w-6 h-6 p-0"
-                          onClick={() => removePhoto(index)}
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </div>
+                {/* Pending Photos - Being Processed */}
+                {pendingPhotos.length > 0 && (
+                  <div className="mt-4 space-y-3">
+                    <h4 className="text-sm font-medium">Processing Photos:</h4>
+                    {pendingPhotos.map((photo, index) => (
+                      <ImageQualityChecker
+                        key={`pending-${index}`}
+                        file={photo}
+                        existingImages={photos}
+                        onAccept={handlePhotoAccept}
+                        onReject={handlePhotoReject}
+                      />
                     ))}
+                  </div>
+                )}
+
+                {/* Approved Photos */}
+                {photos.length > 0 && (
+                  <div className="mt-4">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <h4 className="text-sm font-medium text-green-700">Approved Photos:</h4>
+                    </div>
+                    <div className="grid grid-cols-4 gap-4">
+                      {photos.map((photo, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={URL.createObjectURL(photo)}
+                            alt={`Upload ${index + 1}`}
+                            className="w-full h-20 object-cover rounded border-2 border-green-200"
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="destructive"
+                            className="absolute -top-2 -right-2 w-6 h-6 p-0"
+                            onClick={() => removePhoto(index)}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Rejected Photos */}
+                {rejectedPhotos.length > 0 && (
+                  <div className="mt-4">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <AlertTriangle className="w-4 h-4 text-red-500" />
+                      <h4 className="text-sm font-medium text-red-700">Photos Need Improvement:</h4>
+                    </div>
+                    <div className="space-y-3">
+                      {rejectedPhotos.map((rejected, index) => (
+                        <div key={index} className="flex items-center space-x-3 p-3 bg-red-50 rounded-lg border border-red-200">
+                          <img
+                            src={URL.createObjectURL(rejected.file)}
+                            alt={`Rejected ${index + 1}`}
+                            className="w-16 h-16 object-cover rounded"
+                          />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-red-800">{rejected.file.name}</p>
+                            <ul className="text-xs text-red-600 mt-1">
+                              {rejected.issues.map((issue, issueIndex) => (
+                                <li key={issueIndex}>• {issue}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => retryRejectedPhoto(rejected.file)}
+                              className="text-blue-600 border-blue-300"
+                            >
+                              Retry
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => removeRejectedPhoto(index)}
+                              className="text-red-600 border-red-300"
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

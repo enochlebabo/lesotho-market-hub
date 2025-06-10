@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, Star, Heart } from 'lucide-react';
+import { MapPin, Clock, Star, Heart, ArrowRight, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const featuredItems = [
@@ -95,7 +95,7 @@ const FeaturedListings = () => {
   return (
     <section className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-12">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12 space-y-6 lg:space-y-0">
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Featured Listings
@@ -104,9 +104,29 @@ const FeaturedListings = () => {
               Handpicked goods from trusted sellers across Lesotho
             </p>
           </div>
-          <Button variant="outline" onClick={handleViewAllItems}>
-            View All Items
-          </Button>
+          
+          {/* Enhanced "View All Items" Button */}
+          <div className="relative">
+            <Button 
+              onClick={handleViewAllItems}
+              size="lg"
+              className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-600 hover:from-blue-700 hover:via-purple-700 hover:to-emerald-700 text-white font-semibold px-8 py-4 text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 group"
+            >
+              <Sparkles className="w-5 h-5 mr-3 animate-pulse" />
+              <span className="relative">
+                Explore All 25K+ Items
+              </span>
+              <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform duration-300" />
+              
+              {/* Animated glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-600 rounded-md blur opacity-30 group-hover:opacity-60 transition-opacity duration-300 -z-10"></div>
+            </Button>
+            
+            {/* Floating badge */}
+            <div className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">
+              HOT!
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -188,6 +208,28 @@ const FeaturedListings = () => {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* Second CTA Section */}
+        <div className="mt-12 text-center">
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              Don't Miss Out on Amazing Deals!
+            </h3>
+            <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+              Browse thousands of items from verified sellers across all 10 districts of Lesotho. 
+              From vehicles to electronics, find exactly what you're looking for.
+            </p>
+            <Button 
+              onClick={handleViewAllItems}
+              size="lg"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold px-12 py-4 text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 group"
+            >
+              <Sparkles className="w-5 h-5 mr-3" />
+              Browse Full Marketplace
+              <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform duration-300" />
+            </Button>
+          </div>
         </div>
       </div>
     </section>
