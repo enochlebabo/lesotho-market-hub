@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -62,21 +63,6 @@ const AdminDashboard = () => {
     },
   });
 
-  // New query for pending product listings
-  const { data: pendingListings } = useQuery({
-    queryKey: ['admin-pending-listings'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
-  });
-
   const updateVerificationMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string, status: 'verified' | 'rejected' }) => {
       const { error } = await supabase
@@ -95,26 +81,9 @@ const AdminDashboard = () => {
     },
   });
 
-  // New mutation for approving/rejecting product listings
-  const updateListingMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string, status: 'approved' | 'rejected' }) => {
-      const { error } = await supabase
-        .from('products')
-        .update({ status })
-        .eq('id', id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-pending-listings'] });
-      toast.success('Listing status updated');
-    },
-  });
-
   const stats = {
     totalUsers: businessAccounts?.length || 0,
     pendingVerifications: verificationRequests?.length || 0,
-    pendingListings: pendingListings?.length || 0,
     activeAds: advertisements?.filter(ad => ad.is_active).length || 0,
     monthlyRevenue: advertisements?.reduce((sum, ad) => sum + (ad.monthly_fee || 0), 0) || 0,
     totalTransactions: transactions?.length || 0,
@@ -130,8 +99,8 @@ const AdminDashboard = () => {
         </Badge>
       </div>
 
-      {/* Enhanced Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -149,16 +118,6 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.pendingVerifications}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Listings</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.pendingListings}</div>
           </CardContent>
         </Card>
 
@@ -193,72 +152,13 @@ const AdminDashboard = () => {
         </Card>
       </div>
 
-      <Tabs defaultValue="listings" className="space-y-4">
+      <Tabs defaultValue="verifications" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="listings">Product Listings</TabsTrigger>
           <TabsTrigger value="verifications">Seller Verifications</TabsTrigger>
           <TabsTrigger value="business">Business Accounts</TabsTrigger>
           <TabsTrigger value="ads">Advertisements</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="listings" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Pending Product Listings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {pendingListings?.map((listing) => (
-                <div key={listing.id} className="flex items-center justify-between p-4 border rounded-lg mb-4">
-                  <div className="flex-1">
-                    <h3 className="font-semibold">{listing.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Price: M {listing.price} | Category: {listing.category}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Seller: {listing.seller_id} | Created: {new Date(listing.created_at!).toLocaleDateString()}
-                    </p>
-                    {listing.description && (
-                      <p className="text-sm mt-2 text-gray-600 truncate max-w-md">
-                        {listing.description}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button
-                      size="sm"
-                      onClick={() => updateListingMutation.mutate({ 
-                        id: listing.id, 
-                        status: 'approved' 
-                      })}
-                    >
-                      <Check className="w-4 h-4 mr-1" />
-                      Approve
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => updateListingMutation.mutate({ 
-                        id: listing.id, 
-                        status: 'rejected' 
-                      })}
-                    >
-                      <X className="w-4 h-4 mr-1" />
-                      Reject
-                    </Button>
-                    <Button size="sm" variant="outline">
-                      <Eye className="w-4 h-4 mr-1" />
-                      View
-                    </Button>
-                  </div>
-                </div>
-              ))}
-              {!pendingListings?.length && (
-                <p className="text-muted-foreground">No pending product listings</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="verifications" className="space-y-4">
           <Card>
