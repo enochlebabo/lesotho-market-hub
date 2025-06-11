@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Users, Star, ArrowRight } from 'lucide-react';
+import { MapPin, Users, Star, ArrowRight, Code, Globe, Mail, Phone } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -11,6 +12,54 @@ const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Developer Advertisement Section */}
+        <div className="py-12 border-b border-gray-800">
+          <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-none">
+            <CardContent className="p-8">
+              <div className="text-center space-y-4">
+                <div className="flex items-center justify-center space-x-2">
+                  <Code className="w-8 h-8 text-yellow-300" />
+                  <h3 className="text-2xl font-bold">Professional Web Development Services</h3>
+                </div>
+                <p className="text-lg opacity-90">
+                  Looking for custom web applications, e-commerce solutions, or digital transformation?
+                </p>
+                <div className="grid md:grid-cols-3 gap-6 mt-6">
+                  <div className="text-center">
+                    <Globe className="w-6 h-6 mx-auto mb-2 text-yellow-300" />
+                    <h4 className="font-semibold">Full-Stack Development</h4>
+                    <p className="text-sm opacity-80">React, Node.js, Database Design</p>
+                  </div>
+                  <div className="text-center">
+                    <Star className="w-6 h-6 mx-auto mb-2 text-yellow-300" />
+                    <h4 className="font-semibold">E-Commerce Solutions</h4>
+                    <p className="text-sm opacity-80">Custom marketplaces & online stores</p>
+                  </div>
+                  <div className="text-center">
+                    <Users className="w-6 h-6 mx-auto mb-2 text-yellow-300" />
+                    <h4 className="font-semibold">Business Consulting</h4>
+                    <p className="text-sm opacity-80">Digital strategy & implementation</p>
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-6">
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Mail className="w-4 h-4" />
+                    <span>developer@mochamarket.co.ls</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Phone className="w-4 h-4" />
+                    <span>+266 5000 0000</span>
+                  </div>
+                  <Button variant="secondary" size="sm">
+                    Get Quote
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Newsletter Section */}
         <div className="py-12 border-b border-gray-800">
           <div className="grid md:grid-cols-2 gap-8 items-center">
@@ -98,6 +147,10 @@ const Footer = () => {
               <div className="flex items-center space-x-1">
                 <Star className="w-4 h-4 text-yellow-400" />
                 <span>4.8/5 Rating</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Code className="w-4 h-4 text-blue-400" />
+                <span>Custom Development Available</span>
               </div>
             </div>
           </div>

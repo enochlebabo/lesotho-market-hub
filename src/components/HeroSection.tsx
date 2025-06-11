@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Search, Tag, Shield, Users, ArrowRight, Sparkles } from 'lucide-react';
+import { Search, Tag, Shield, Users, ArrowRight, Sparkles, Code } from 'lucide-react';
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -18,6 +18,17 @@ const HeroSection = () => {
   return (
     <section className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-emerald-600 text-white">
       <div className="absolute inset-0 bg-black/20"></div>
+      
+      {/* Developer Credit Badge */}
+      <div className="absolute top-4 right-4 z-10">
+        <div className="bg-black/30 backdrop-blur-sm rounded-lg px-3 py-2 text-xs">
+          <div className="flex items-center space-x-2 text-yellow-300">
+            <Code className="w-3 h-3" />
+            <span>Custom Development by MoCha Tech</span>
+          </div>
+        </div>
+      </div>
+
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="text-center space-y-8">
           <h1 className="text-4xl md:text-6xl font-bold leading-tight">
@@ -36,14 +47,14 @@ const HeroSection = () => {
             <div className="relative">
               <Button 
                 size="lg" 
-                className="relative bg-white text-blue-600 hover:bg-blue-50 font-semibold px-8 py-4 text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 group w-full sm:w-auto"
+                className="relative bg-white text-blue-600 hover:bg-blue-50 font-semibold px-12 py-6 text-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 group w-full sm:w-auto"
                 onClick={handleBrowseMarketplace}
               >
-                <Search className="w-5 h-5 mr-3" />
+                <Search className="w-6 h-6 mr-3" />
                 <span className="relative">
-                  Explore 25K+ Items
+                  View All 25K+ Items
                 </span>
-                <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform duration-300" />
+                <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform duration-300" />
               </Button>
               
               {/* Pulsing ring effect */}
@@ -51,7 +62,7 @@ const HeroSection = () => {
               
               {/* Hot badge */}
               <div className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">
-                NEW
+                BROWSE
               </div>
             </div>
             
