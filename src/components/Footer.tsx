@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Users, Star, ArrowRight, Code, Globe, Mail, Phone, GraduationCap, Heart } from 'lucide-react';
+import { MapPin, Users, Star, ArrowRight, Code, Globe, Mail, Phone, GraduationCap, Heart, ExternalLink } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,7 +23,7 @@ const Footer = () => {
                 </div>
                 <div className="max-w-4xl mx-auto space-y-6">
                   <div className="bg-black/20 backdrop-blur-sm rounded-lg p-6">
-                    <h4 className="text-xl font-semibold mb-4 text-yellow-300">Founder & Lead Developer</h4>
+                    <h4 className="text-xl font-semibold mb-4 text-yellow-300">Mr. Enoch Lebabo - Founder & Lead Developer</h4>
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-3">
                         <div className="flex items-center space-x-2">
@@ -31,24 +31,23 @@ const Footer = () => {
                           <span className="font-medium">Education & Background</span>
                         </div>
                         <p className="text-sm opacity-90">
-                          Scholar and Computer Science Graduate with expertise in AI, Machine Learning, 
-                          and Full-Stack Development
+                          Information Technology Engineer pursuing B.Tech in IT at BVM Engineering College, 
+                          Gujarat Technological University (GTU), India
                         </p>
                         <p className="text-sm opacity-90">
-                          Specialized in creating innovative digital solutions for emerging markets
+                          Specialized in Mobile Development, AI, Cloud Integration, and User-Centric System Design
                         </p>
                       </div>
                       <div className="space-y-3">
                         <div className="flex items-center space-x-2">
                           <Star className="w-5 h-5 text-yellow-300" />
-                          <span className="font-medium">Inspiration & Mission</span>
+                          <span className="font-medium">Innovation & Leadership</span>
                         </div>
                         <p className="text-sm opacity-90">
-                          Inspired by the potential of technology to transform local economies 
-                          and empower communities across Africa
+                          Leading AI-powered crop disease detection systems and Lesotho-centric marketplace solutions
                         </p>
                         <p className="text-sm opacity-90">
-                          Dedicated to bridging the digital divide and fostering economic growth in Lesotho
+                          Dedicated to leveraging technology for economic development and social transformation in Africa
                         </p>
                       </div>
                     </div>
@@ -56,15 +55,39 @@ const Footer = () => {
                       <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <div className="flex items-center space-x-2 text-sm">
                           <Mail className="w-4 h-4" />
-                          <span>founder@mochamarket.co.ls</span>
+                          <span>enochlebabo@gmail.com</span>
                         </div>
                         <div className="flex items-center space-x-2 text-sm">
                           <Phone className="w-4 h-4" />
-                          <span>+266 5000 0001</span>
+                          <span>+91 63592 89443</span>
                         </div>
-                        <Button variant="secondary" size="sm">
+                        <Button 
+                          variant="secondary" 
+                          size="sm"
+                          onClick={() => window.open('mailto:enochlebabo@gmail.com', '_blank')}
+                        >
                           Contact Founder
                           <ArrowRight className="w-4 h-4 ml-2" />
+                        </Button>
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-3">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="text-white border-white hover:bg-white hover:text-blue-600"
+                          onClick={() => window.open('https://linkedin.com/in/enoch-lebabo-04b651266', '_blank')}
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          LinkedIn
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="text-white border-white hover:bg-white hover:text-blue-600"
+                          onClick={() => window.open('https://github.com/enochlebabo', '_blank')}
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          GitHub
                         </Button>
                       </div>
                     </div>
@@ -74,18 +97,18 @@ const Footer = () => {
                 <div className="grid md:grid-cols-3 gap-6 mt-6">
                   <div className="text-center">
                     <Globe className="w-6 h-6 mx-auto mb-2 text-yellow-300" />
-                    <h4 className="font-semibold">Tech Innovation</h4>
-                    <p className="text-sm opacity-80">AI-Powered Solutions for Africa</p>
+                    <h4 className="font-semibold">AI Innovation</h4>
+                    <p className="text-sm opacity-80">TensorFlow & Flutter Solutions</p>
                   </div>
                   <div className="text-center">
                     <Users className="w-6 h-6 mx-auto mb-2 text-yellow-300" />
                     <h4 className="font-semibold">Community Impact</h4>
-                    <p className="text-sm opacity-80">Empowering Local Entrepreneurs</p>
+                    <p className="text-sm opacity-80">Empowering African Economies</p>
                   </div>
                   <div className="text-center">
                     <Code className="w-6 h-6 mx-auto mb-2 text-yellow-300" />
-                    <h4 className="font-semibold">Custom Development</h4>
-                    <p className="text-sm opacity-80">Bespoke Solutions Available</p>
+                    <h4 className="font-semibold">Technical Leadership</h4>
+                    <p className="text-sm opacity-80">Cloud & Mobile Development</p>
                   </div>
                 </div>
               </div>
@@ -170,7 +193,7 @@ const Footer = () => {
         <div className="py-6 border-t border-gray-800">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-sm text-gray-400">
-              © 2024 MoCha Market. All rights reserved. Made with ❤️ in Lesotho.
+              © 2024 MoCha Market. All rights reserved. Made with ❤️ by Enoch Lebabo in Lesotho.
             </div>
             <div className="flex items-center space-x-6 text-sm text-gray-400">
               <div className="flex items-center space-x-1">
@@ -183,7 +206,7 @@ const Footer = () => {
               </div>
               <div className="flex items-center space-x-1">
                 <GraduationCap className="w-4 h-4 text-blue-400" />
-                <span>Scholar-Founded</span>
+                <span>GTU Engineering</span>
               </div>
             </div>
           </div>
