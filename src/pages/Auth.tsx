@@ -6,11 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useAuth } from '@/components/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, ArrowLeft } from 'lucide-react';
+import { MapPin, ArrowLeft, Shield } from 'lucide-react';
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isAdminLogin, setIsAdminLogin] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -22,7 +24,14 @@ const Auth = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      // Check if user is admin and redirect accordingly
+      if (user.email === 'admin@mochamarket.co.ls' || 
+          user.user_metadata?.first_name === 'admin' || 
+          user.user_metadata?.last_name === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     }
   }, [user, navigate]);
 
@@ -36,8 +45,13 @@ const Auth = () => {
         if (error) {
           toast.error(error.message);
         } else {
-          toast.success("Welcome back to MoCha Market!");
-          navigate('/');
+          if (isAdminLogin) {
+            toast.success("Welcome to Admin Panel!");
+            navigate('/admin');
+          } else {
+            toast.success("Welcome back to MoCha Market!");
+            navigate('/');
+          }
         }
       } else {
         if (!firstName || !lastName) {
@@ -89,25 +103,50 @@ const Auth = () => {
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900">
-              {isLogin ? 'Welcome back' : 'Join MoCha Market'}
+              {isAdminLogin ? 'Admin Access' : (isLogin ? 'Welcome back' : 'Join MoCha Market')}
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              {isLogin 
-                ? 'Sign in to your account to start buying and selling' 
-                : 'Create your account to join Lesotho\'s digital marketplace'
+              {isAdminLogin 
+                ? 'Administrative access to manage the platform'
+                : (isLogin 
+                  ? 'Sign in to your account to start buying and selling' 
+                  : 'Create your account to join Lesotho\'s digital marketplace'
+                )
               }
             </p>
           </div>
 
+          {/* Login Type Selection */}
+          <div className="flex justify-center space-x-4">
+            <Button
+              variant={!isAdminLogin ? "default" : "outline"}
+              size="sm"
+              onClick={() => setIsAdminLogin(false)}
+            >
+              User Login
+            </Button>
+            <Button
+              variant={isAdminLogin ? "default" : "outline"}
+              size="sm"
+              onClick={() => setIsAdminLogin(true)}
+              className="flex items-center space-x-2"
+            >
+              <Shield className="w-4 h-4" />
+              <span>Admin Login</span>
+            </Button>
+          </div>
+
           <Card>
             <CardHeader>
-              <CardTitle className="text-center">
-                {isLogin ? 'Sign In' : 'Create Account'}
+              <CardTitle className="text-center flex items-center justify-center space-x-2">
+                {isAdminLogin && <Shield className="w-5 h-5 text-blue-600" />}
+                <span>{isAdminLogin ? 'Admin Sign In' : (isLogin ? 'Sign In' : 'Create Account')}</span>
+                {isAdminLogin && <Badge variant="secondary">Admin</Badge>}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
-                {!isLogin && (
+                {!isLogin && !isAdminLogin && (
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="firstName">First Name</Label>
@@ -141,7 +180,7 @@ const Auth = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your.email@example.com"
+                    placeholder={isAdminLogin ? "admin@mochamarket.co.ls" : "your.email@example.com"}
                     required
                   />
                 </div>
@@ -159,22 +198,24 @@ const Auth = () => {
                 </div>
 
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
+                  {loading ? 'Please wait...' : (isAdminLogin ? 'Access Admin Panel' : (isLogin ? 'Sign In' : 'Create Account'))}
                 </Button>
               </form>
 
-              <div className="mt-6 text-center">
-                <button
-                  type="button"
-                  onClick={() => setIsLogin(!isLogin)}
-                  className="text-sm text-blue-600 hover:text-blue-500"
-                >
-                  {isLogin 
-                    ? "Don't have an account? Sign up" 
-                    : "Already have an account? Sign in"
-                  }
-                </button>
-              </div>
+              {!isAdminLogin && (
+                <div className="mt-6 text-center">
+                  <button
+                    type="button"
+                    onClick={() => setIsLogin(!isLogin)}
+                    className="text-sm text-blue-600 hover:text-blue-500"
+                  >
+                    {isLogin 
+                      ? "Don't have an account? Sign up" 
+                      : "Already have an account? Sign in"
+                    }
+                  </button>
+                </div>
+              )}
             </CardContent>
           </Card>
 

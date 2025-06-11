@@ -12,6 +12,7 @@ import FeaturedListings from '@/components/FeaturedListings';
 import AdBanner from '@/components/AdBanner';
 import Footer from '@/components/Footer';
 import AuthButton from '@/components/auth/AuthButton';
+import NavigationMenu from '@/components/NavigationMenu';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -70,6 +71,11 @@ const Index = () => {
                 List Item
               </Button>
             </div>
+          </div>
+
+          {/* Navigation Menu */}
+          <div className="py-2 border-t">
+            <NavigationMenu />
           </div>
 
           {/* Mobile Search */}

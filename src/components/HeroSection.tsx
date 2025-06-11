@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Search, Tag, Shield, Users, ArrowRight, Sparkles, Code } from 'lucide-react';
+import { Search, Tag, Shield, Users, ArrowRight, Sparkles } from 'lucide-react';
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -18,16 +18,6 @@ const HeroSection = () => {
   return (
     <section className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-emerald-600 text-white">
       <div className="absolute inset-0 bg-black/20"></div>
-      
-      {/* Developer Credit Badge */}
-      <div className="absolute top-4 right-4 z-10">
-        <div className="bg-black/30 backdrop-blur-sm rounded-lg px-3 py-2 text-xs">
-          <div className="flex items-center space-x-2 text-yellow-300">
-            <Code className="w-3 h-3" />
-            <span>Custom Development by MoCha Tech</span>
-          </div>
-        </div>
-      </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="text-center space-y-8">
