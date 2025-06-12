@@ -13,6 +13,10 @@ import AdBanner from '@/components/AdBanner';
 import Footer from '@/components/Footer';
 import AuthButton from '@/components/auth/AuthButton';
 import NavigationMenu from '@/components/NavigationMenu';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { ScrollToTop } from '@/components/ui/scroll-to-top';
+import { Breadcrumb } from '@/components/navigation/Breadcrumb';
+import { SearchWithSuggestions } from '@/components/search/SearchWithSuggestions';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -26,10 +30,9 @@ const Index = () => {
     navigate('/list-product');
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      navigate(`/products?search=${encodeURIComponent(query)}`);
     } else {
       navigate('/products');
     }
@@ -38,7 +41,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header/Navigation */}
-      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+      <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
@@ -52,19 +55,15 @@ const Index = () => {
             </div>
             
             <div className="flex-1 max-w-md mx-8 hidden md:block">
-              <form onSubmit={handleSearch} className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  type="text"
-                  placeholder="Search for vehicles, electronics, furniture..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </form>
+              <SearchWithSuggestions
+                value={searchQuery}
+                onChange={setSearchQuery}
+                onSearch={handleSearch}
+              />
             </div>
 
             <div className="flex items-center space-x-3">
+              <ThemeToggle />
               <AuthButton />
               <Button size="sm" onClick={handleSellItems}>
                 <Tag className="w-4 h-4 mr-2" />
@@ -80,22 +79,23 @@ const Index = () => {
 
           {/* Mobile Search */}
           <div className="md:hidden pb-4">
-            <form onSubmit={handleSearch} className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Search marketplace..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </form>
+            <SearchWithSuggestions
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onSearch={handleSearch}
+              placeholder="Search marketplace..."
+            />
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main>
+        {/* Breadcrumb Navigation */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb />
+        </div>
+
         <HeroSection />
         
         {/* Advertisement Banner */}
@@ -111,25 +111,25 @@ const Index = () => {
         <section className="py-12 bg-muted/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              <h2 className="text-2xl font-bold text-foreground mb-2">
                 Where Goods Meet Good People
               </h2>
-              <p className="text-gray-600">Supporting Lesotho's digital economy</p>
+              <p className="text-muted-foreground">Supporting Lesotho's digital economy</p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-              <div>
+              <div className="space-y-2">
                 <div className="text-3xl font-bold text-primary">10+</div>
                 <div className="text-sm text-muted-foreground">Districts Covered</div>
               </div>
-              <div>
+              <div className="space-y-2">
                 <div className="text-3xl font-bold text-primary">500+</div>
                 <div className="text-sm text-muted-foreground">Local Businesses</div>
               </div>
-              <div>
+              <div className="space-y-2">
                 <div className="text-3xl font-bold text-primary">25K+</div>
                 <div className="text-sm text-muted-foreground">Items Listed</div>
               </div>
-              <div>
+              <div className="space-y-2">
                 <div className="text-3xl font-bold text-primary">50K+</div>
                 <div className="text-sm text-muted-foreground">Happy Users</div>
               </div>
@@ -140,7 +140,7 @@ const Index = () => {
         <FeaturedListings />
 
         {/* SME Support Section */}
-        <section className="py-16 bg-gradient-to-r from-emerald-600 to-blue-600 text-white">
+        <section className="py-16 bg-gradient-to-r from-emerald-600 to-blue-600 text-white dark:from-emerald-700 dark:to-blue-700">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <Briefcase className="w-16 h-16 mx-auto mb-6 opacity-80" />
             <h2 className="text-3xl font-bold mb-4">Empowering Lesotho's Economy</h2>
@@ -161,6 +161,7 @@ const Index = () => {
       </main>
 
       <Footer />
+      <ScrollToTop />
     </div>
   );
 };
